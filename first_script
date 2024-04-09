@@ -1,0 +1,45 @@
+#!/bin/bash
+# version 0.1
+
+architecture=$(uname -a)
+
+ip=$(hostname -I)
+mac=$(ip add | grep link/ether | awk '{print $2}')
+
+who|cut -f 1 -d " "|sort -u | wc -l
+who | awk '{print $1}'| sort -u | wc -l
+
+echo "#Architecture: $architecture"
+echo "#Network: IP $ip ($mac)"
+
+
+
+ss --tcp | grep ESTAB | wc -l | wc -w  |awk '{printf"%d | %d ESTABLISHED\n", $1, $2}' ou ps -aux | grep @
+
+who -b
+
+free -m
+
+users 
+
+grep "physical id" /proc/cpuinfo
+
+#!/usr/bin/bash
+
+wall "
+	#Architecture	: $(uname -a)
+	#CPU physical	: $(lscpu | grep Socket | wc -l)
+	#vCPU		: $(cat /proc/cpuinfo | grep processor | wc -l)
+	#Memory Usage	: $(free -m | grep Mem | awk '{printf "%d/%dMB (%.2f%%)", $3, $2, $3*100/$2}')
+	#Disk Usage	: $(df -Bg --total | grep total |awk '{printf "%d/%dGB (%d%%)", $3 * 1024, $4, $5}')
+	#CPU load	: $(mpstat | grep all | cut -c 20- | awk '{printf "%.2f%%", 100 - $10}')
+	#Last boot	: $(who -b | awk '{printf "%s %s", $3, $4}')
+$(if cat /etc/fstab | grep -q mapper; then
+	echo "	#LVM use	: yes"
+else
+	echo "	#LVM use	: no"
+fi)
+	#Connections TCP: $(ss --tcp | wc -l | awk '{printf "%d ESTABLISHED", $1 - 1}')
+	#User log	: $(users | wc -w)
+	#Network	: IP $(hostname -I)$(ip link | grep ether | awk '{printf "(%s)", $2}')
+	#Sudo		: $(ls /var/log/sudo/00/00/ | wc -w) cmd"
